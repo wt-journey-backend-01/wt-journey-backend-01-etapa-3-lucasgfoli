@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "knex": "^3.1.0",
+    "nodemon": "^3.1.10",
+    "pg": "^8.16.3"
+  },
+  "name": "wt-journey-backend-01-etapa-3-lucasgfoli",
+  "description": "[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mzlsx7b3)",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-lucasgfoli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-lucasgfoli/issues"
+  },
+  "homepage": "https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-lucasgfoli#readme"
+}
