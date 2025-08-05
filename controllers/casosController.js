@@ -1,6 +1,5 @@
 const casosRepository = require("../repositories/casosRepository")
 const agentesRepository = require("../repositories/agentesRepository")
-const { v4: uuidv4 } = require('uuid')
 const handlerError = require('../utils/errorHandler')
 
 async function getAllCasos(req, res) {
