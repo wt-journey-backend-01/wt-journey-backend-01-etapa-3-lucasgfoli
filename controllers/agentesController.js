@@ -2,10 +2,10 @@ const agentesRepository = require('../repositories/agentesRepository')
 const { v4: uuidv4 } = require('uuid')
 const handlerError = require('../utils/errorHandler')
 
-function getAllAgentes(req, res) {
+async function getAllAgentes(req, res) {
     try {
         const { cargo, dataDeIncorporacao, orderBy, order } = req.query
-        let agentes = agentesRepository.findAll()
+        let agentes = await agentesRepository.findAll()
         const { dataInicio, dataFim } = req.query
 
         if (dataInicio || dataFim) {
@@ -59,10 +59,10 @@ function getAllAgentes(req, res) {
     }
 }
 
-function getAgenteById(req, res) {
+async function getAgenteById(req, res) {
     try {
         const { id } = req.params
-        const agente = agentesRepository.findById(id)
+        const agente = await agentesRepository.findById(id)
 
         if (!agente)
             return res.status(404).json({ message: 'Agente não encontrado.' })
@@ -73,10 +73,9 @@ function getAgenteById(req, res) {
     }
 }
 
-function createAgente(req, res) {
+async function createAgente(req, res) {
     try {
         const { nome, dataDeIncorporacao, cargo } = req.body
-        const id = uuidv4()
 
         if (!validarData(dataDeIncorporacao))
             return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' })
@@ -84,16 +83,16 @@ function createAgente(req, res) {
         if (!nome || !dataDeIncorporacao || !cargo)
             return res.status(400).json({ message: 'Todos os campos são obrigatórios.' })
 
-        const newAgente = { id, nome, dataDeIncorporacao, cargo }
+        const newAgente = { nome, dataDeIncorporacao, cargo }
 
-        agentesRepository.create(newAgente)
+        await agentesRepository.create(newAgente)
         res.status(201).json(newAgente)
     } catch (error) {
         handlerError(res, error)
     }
 }
 
-function updateAgente(req, res) {
+async function updateAgente(req, res) {
     try {
         const { id } = req.params
         const { nome, dataDeIncorporacao, cargo, id: idBody } = req.body
@@ -107,7 +106,7 @@ function updateAgente(req, res) {
         if (!nome || !dataDeIncorporacao || !cargo)
             return res.status(400).json({ message: 'Todos os campos são obrigatórios.' })
 
-        const agenteAtualizado = agentesRepository.update(id, { nome, dataDeIncorporacao, cargo })
+        const agenteAtualizado = await agentesRepository.update(id, { nome, dataDeIncorporacao, cargo })
 
         if (!agenteAtualizado)
             return res.status(404).json({ message: 'Agente não encontrado.' })
@@ -118,7 +117,7 @@ function updateAgente(req, res) {
     }
 }
 
-function patchAgente(req, res) {
+async function patchAgente(req, res) {
     try {
         const { id } = req.params
         const updates = req.body
@@ -135,7 +134,7 @@ function patchAgente(req, res) {
         if (camposAtualizaveis.length === 0)
             return res.status(400).json({ message: 'Deve conter pelo menos um campo válido para atualização.' })
 
-        const patchedAgente = agentesRepository.patchById(id, updates)
+        const patchedAgente = await agentesRepository.patchById(id, updates)
 
         if (!patchedAgente)
             return res.status(404).json({ message: 'Agente não encontrado.' })
@@ -146,7 +145,7 @@ function patchAgente(req, res) {
     }
 }
 
-function deleteAgente(req, res) {
+async function deleteAgente(req, res) {
     try {
         const { id } = req.params
         const agente = agentesRepository.findById(id)
@@ -154,7 +153,7 @@ function deleteAgente(req, res) {
         if (!agente)
             return res.status(404).json({ message: 'Agente não encontrado.' })
 
-        agentesRepository.deleteById(id)
+        await agentesRepository.deleteById(id)
         res.status(204).send()
     } catch (error) {
         handlerError(res, error)

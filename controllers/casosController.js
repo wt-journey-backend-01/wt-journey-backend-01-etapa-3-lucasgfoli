@@ -3,10 +3,10 @@ const agentesRepository = require("../repositories/agentesRepository")
 const { v4: uuidv4 } = require('uuid')
 const handlerError = require('../utils/errorHandler')
 
-function getAllCasos(req, res) {
+async function getAllCasos(req, res) {
     try {
         const { status, agente_id, search, orderBy, order } = req.query
-        let casos = casosRepository.findAll()
+        let casos = await casosRepository.findAll()
 
         if (search) {
             const termo = search.toLowerCase()
@@ -25,7 +25,8 @@ function getAllCasos(req, res) {
         }
 
         if (agente_id) {
-            if (!agentesRepository.findById(agente_id))
+            const agenteExistente = await agentesRepository.findById(agente_id)
+            if (!agenteExistente)
                 return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
 
             casos = casos.filter(caso => caso.agente_id === agente_id)
@@ -50,10 +51,11 @@ function getAllCasos(req, res) {
             return res.status(400).json({ message: "Parâmetro 'order' inválido. Use 'asc' ou 'desc'." })
         }
 
-        const casosComMesmoAgente = casos.map(caso => ({
-            ...caso,
-            agente: agentesRepository.findById(caso.agente_id)
-        }))
+        const casosComMesmoAgente = await Promise.all(
+            casos.map(async caso => ({
+                ...caso,
+                agente: await agentesRepository.findById(caso.agente_id)
+            })))
 
         res.status(200).json(casosComMesmoAgente)
     } catch (error) {
@@ -61,15 +63,15 @@ function getAllCasos(req, res) {
     }
 }
 
-function getSpecificCase(req, res) {
+async function getSpecificCase(req, res) {
     try {
         const { id } = req.params
-        const caso = casosRepository.findById(id)
+        const caso = await casosRepository.findById(id)
 
         if (!caso)
             return res.status(404).json({ message: "Caso não encontrado." })
 
-        const agente = agentesRepository.findById(caso.agente_id)
+        const agente = await agentesRepository.findById(caso.agente_id)
 
         res.status(200).json({
             ...caso,
@@ -80,11 +82,10 @@ function getSpecificCase(req, res) {
     }
 }
 
-function createCase(req, res) {
+async function createCase(req, res) {
     try {
         const { titulo, descricao, status, agente_id } = req.body
-        const id = uuidv4()
-        const agenteExistente = agentesRepository.findById(agente_id)
+        const agenteExistente = await agentesRepository.findById(agente_id)
 
         if (typeof titulo !== 'string')
             return res.status(400).json({ message: "O título deve ser uma string." })
@@ -101,23 +102,23 @@ function createCase(req, res) {
         if (status !== "aberto" && status !== "solucionado")
             return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
 
-        const newCase = { id, titulo, descricao, status, agente_id }
-        casosRepository.create(newCase)
+        const newCase = { titulo, descricao, status, agente_id }
+        const createdCase = await casosRepository.create(newCase)
 
-        res.status(201).json(newCase)
+        res.status(201).json(createdCase)
     } catch (error) {
         handlerError(res, error)
     }
 }
 
-function updateCase(req, res) {
+async function updateCase(req, res) {
     try {
         const { id } = req.params
         const { id: idBody, titulo, descricao, status, agente_id } = req.body
-        const agenteExistente = agentesRepository.findById(agente_id)
+        const agenteExistente = await agentesRepository.findById(agente_id)
 
-        if(idBody && idBody !== id)
-            return res.status(400).json({message: "O campo 'id' não pode ser alterado."})
+        if (idBody && idBody !== id)
+            return res.status(400).json({ message: "O campo 'id' não pode ser alterado." })
 
         if (typeof titulo !== 'string')
             return res.status(400).json({ message: "O título deve ser uma string." })
@@ -134,7 +135,7 @@ function updateCase(req, res) {
         if (status !== "aberto" && status !== "solucionado")
             return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
 
-        const updatedCase = casosRepository.update(id, titulo, descricao, status, agente_id)
+        const updatedCase = await casosRepository.update(id, { titulo, descricao, status, agente_id })
 
         if (!updatedCase)
             return res.status(404).json({ message: "Caso não encontrado." })
@@ -145,14 +146,14 @@ function updateCase(req, res) {
     }
 }
 
-function patchCase(req, res) {
+async function patchCase(req, res) {
     try {
         const { id } = req.params
         const updates = req.body
         const camposValidos = ['titulo', 'descricao', 'status', 'agente_id']
 
-        if('id' in updates)
-            return res.status(400).json({message: "O campo 'id' não pode ser alterado."})
+        if ('id' in updates)
+            return res.status(400).json({ message: "O campo 'id' não pode ser alterado." })
 
         const camposAtualizaveis = Object.keys(updates).filter(campo => {
             return camposValidos.includes(campo)
@@ -171,12 +172,12 @@ function patchCase(req, res) {
             return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
 
         if (updates.agente_id) {
-            const agenteExistente = agentesRepository.findById(updates.agente_id)
+            const agenteExistente = await agentesRepository.findById(updates.agente_id)
             if (!agenteExistente)
                 return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
         }
 
-        const updatedCase = casosRepository.patchById(id, updates)
+        const updatedCase = await casosRepository.patchById(id, updates)
 
         if (!updatedCase)
             return res.status(404).json({ message: "Caso não encontrado." })
@@ -187,15 +188,15 @@ function patchCase(req, res) {
     }
 }
 
-function deleteCase(req, res) {
+async function deleteCase(req, res) {
     try {
         const { id } = req.params
-        const casoDeletado = casosRepository.findById(id)
+        const casoDeletado = await casosRepository.findById(id)
 
         if (!casoDeletado)
             return res.status(404).json({ message: "Caso não encontrado." })
 
-        casosRepository.deleteById(id)
+        await casosRepository.deleteById(id)
         res.status(204).send()
     } catch (error) {
         handlerError(res, error)
