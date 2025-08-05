@@ -148,7 +148,7 @@ async function patchAgente(req, res) {
 async function deleteAgente(req, res) {
     try {
         const { id } = req.params
-        const agente = agentesRepository.findById(id)
+        const agente = await agentesRepository.findById(id)
 
         if (!agente)
             return res.status(404).json({ message: 'Agente não encontrado.' })
