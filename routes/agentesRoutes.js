@@ -12,27 +12,24 @@
  *     summary: Retorna todos os agentes
  *     tags: [Agentes]
  *     parameters:
-  - in: query
-    name: dataInicio
-    schema:
-      type: string
-      format: date
-    description: Data inicial para filtrar agentes pela data de incorporação
-
-  - in: query
-    name: dataFim
-    schema:
-      type: string
-      format: date
-    description: Data final para filtrar agentes pela data de incorporação
-
-  - in: query
-    name: dataDeIncorporacao
-    schema:
-      type: string
-      format: date
-    description: Data exata de incorporação para filtro
-
+ *       - in: query
+ *         name: dataInicio
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Data inicial para filtrar agentes pela data de incorporação
+ *       - in: query
+ *         name: dataFim
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Data final para filtrar agentes pela data de incorporação
+ *       - in: query
+ *         name: dataDeIncorporacao
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Data exata de incorporação para filtro
  *     responses:
  *       200:
  *         description: Lista de agentes
@@ -42,7 +39,11 @@
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Agente'
- *
+ */
+
+/**
+ * @swagger
+ * /agentes:
  *   post:
  *     summary: Cadastra um novo agente
  *     tags: [Agentes]
@@ -60,7 +61,6 @@
  *             schema:
  *               $ref: '#/components/schemas/Agente'
  */
-
 /**
  * @swagger
  * /agentes/{id}:
