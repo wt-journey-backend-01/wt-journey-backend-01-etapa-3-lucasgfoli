@@ -2,9 +2,9 @@
 
 # 🧪 Relatório de Avaliação – Journey Levty Etapa 1 - lucasgfoli
 
-**Data:** 06/08/2025 19:53
+**Data:** 06/08/2025 19:58
 
-**Nota Final:** `0.00/100`
+**Nota Final:** `11.45/100`
 **Status:** ❌ Reprovado
 
 ---
@@ -61,9 +61,7 @@
 - Nenhum item bônus foi identificado. Tente adicionar mais estilo e complexidade ao seu código nas próximas tentativas!
 
 ## ❌ Problemas Detectados (Descontos de até 100 pontos)
-- Foram encontrados `1` problemas que acarretam descontos. Veja abaixo os testes penalizados:
-  - ⚠️ **Falhou no teste de penalidade**: `ENV: Arquivo .env está presente na root do projeto`
-    - **Correção sugerida**: Nenhuma sugestão de correção disponível.
+- Nenhuma infração grave foi detectada. Muito bom nesse aspecto!
 
 ---
 Continue praticando e caprichando no código. Cada detalhe conta! 💪
