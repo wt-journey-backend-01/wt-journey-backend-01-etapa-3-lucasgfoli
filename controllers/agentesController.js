@@ -84,8 +84,8 @@ async function createAgente(req, res) {
 
         const newAgente = { nome, dataDeIncorporacao, cargo }
 
-        await agentesRepository.create(newAgente)
-        res.status(201).json(newAgente)
+        const agenteCriado = await agentesRepository.create(newAgente)
+        res.status(201).json(agenteCriado)
     } catch (error) {
         handlerError(res, error)
     }
