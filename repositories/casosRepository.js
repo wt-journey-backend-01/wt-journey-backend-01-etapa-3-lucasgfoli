@@ -1,16 +1,16 @@
-const knex = require('../db/db')
+const db = require('../db/db')
 
 async function findAll(){
-    return await knex('casos').select('*')
+    return await db('casos').select('*')
 }
 
 async function findById(id) {
-    const caso = await knex('casos').where({id}).first()
+    const caso = await db('casos').where({id}).first()
     return caso || null
 }
 
 async function create({ titulo, descricao, status, agente_id }) {
-    const [id] = await knex('casos').insert({
+    const [id] = await db('casos').insert({
         titulo,
         descricao,
         status,
@@ -21,7 +21,7 @@ async function create({ titulo, descricao, status, agente_id }) {
 }
 
 async function update(id, { titulo, descricao, status, agente_id }) {
-    const rowsAffected = await knex('casos')
+    const rowsAffected = await db('casos')
         .where({id})
         .update({ titulo, descricao, status, agente_id })
 
@@ -31,7 +31,7 @@ async function update(id, { titulo, descricao, status, agente_id }) {
 async function patchById(id, updates) {
     delete updates.id
 
-    const rowsAffected = await knex('casos')
+    const rowsAffected = await db('casos')
         .where({id})
         .update(updates)
 
@@ -43,7 +43,7 @@ async function deleteById(id) {
 
     if(!caso) return null
 
-    await knex('casos').where({ id }).del()
+    await db('casos').where({ id }).del()
     return caso
 }
 
