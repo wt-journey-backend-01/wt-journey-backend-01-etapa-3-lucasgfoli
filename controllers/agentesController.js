@@ -18,7 +18,7 @@ async function getAllAgentes(req, res) {
         }
 
         if (cargo) {
-            const cargosValidos = ['delegado', 'investigador', 'escrivao', 'policial']
+            const cargosValidos = ['delegado', 'Investigador', 'escrivao', 'Policial']
             if (!cargosValidos.includes(cargo.toLowerCase()))
                 return res.status(400).json({ message: `Cargo inválido. Use um dos seguintes valores: ${cargosValidos.join(', ')}` })
 

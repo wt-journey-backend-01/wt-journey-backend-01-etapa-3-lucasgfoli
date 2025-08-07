@@ -10,11 +10,13 @@ async function findById(id) {
 }
 
 async function create({nome, dataDeIncorporacao, cargo}){
-    const [id] = await db('agentes').insert({
+    const [result] = await db('agentes').insert({
         nome,
         dataDeIncorporacao,
         cargo
     }).returning('id')
+
+    const id = typeof result === 'object' ? result.id : result
 
     return findById(id)
 }
