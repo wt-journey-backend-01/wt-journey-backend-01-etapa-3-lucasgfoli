@@ -8,7 +8,7 @@ async function findById(id) {
     const agente = await db('agentes').where({id}).first()
     return agente || null
 }
-
+//
 async function create({nome, dataDeIncorporacao, cargo}){
     const [result] = await db('agentes').insert({
         nome,
