@@ -30,8 +30,6 @@ async function update(id, { nome, dataDeIncorporacao, cargo }) {
 }
 
 async function patchById(id, updates) {
-    delete updates.id
-
     const rowsAffected = await db('agentes')
         .where({id})
         .update(updates)
@@ -45,7 +43,6 @@ async function deleteById(id) {
     if(!agente) return null
 
     await db('agentes').where({ id }).del()
-    return agente
 }
 
 module.exports = {
