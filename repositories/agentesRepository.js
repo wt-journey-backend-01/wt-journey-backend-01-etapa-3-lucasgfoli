@@ -1,55 +1,42 @@
-const db = require('../db/db')
+const db = require("../db/db")
 
-async function findAll(){
-    return await db('agentes').select('*')
+async function findAll() {
+  return await db("agentes").select("*")
 }
 
 async function findById(id) {
-    const agente = await db('agentes').where({id}).first()
-    return agente || null
-}
-//
-async function create({nome, dataDeIncorporacao, cargo}){
-    const [result] = await db('agentes').insert({
-        nome,
-        dataDeIncorporacao,
-        cargo
-    }).returning('id')
-
-    const id = typeof result === 'object' ? result.id : result
-
-    return findById(id)
+  return await db("agentes").where({ id }).first()
 }
 
-async function update(id, { nome, dataDeIncorporacao, cargo }) {
-    const rowsAffected = await db('agentes')
-        .where({id})
-        .update({nome, dataDeIncorporacao, cargo})
-
-    return rowsAffected ? findById(id) : null
+async function create(agente) {
+  await db("agentes").insert(agente)
+  return agente
 }
 
-async function patchById(id, updates) {
-    const rowsAffected = await db('agentes')
-        .where({id})
-        .update(updates)
+async function update(id, updateAgente) {
+  const count = await db("agentes").where({ id }).update(updateAgente)
+  if (count === 0) return undefined
+  return findById(id)
+}
 
-    return rowsAffected ? findById(id) : null 
+async function patchById(id, updateAgente) {
+  const rollBacks = await db("agentes").where({ id }).update(updateAgente)
+  return rollBacks ? findById(id) : undefined
 }
 
 async function deleteById(id) {
-    const agente = await findById(id)
+  const agente = await findById(id)
+  if (!agente) return undefined
 
-    if(!agente) return null
-
-    await db('agentes').where({ id }).del()
+  await db("agentes").where({ id }).del()
+  return true
 }
 
 module.exports = {
-    findAll,
-    findById,
-    create,
-    update,
-    patchById,
-    deleteById
+  findAll,
+  findById,
+  create,
+  update,
+  patchById,
+  deleteById,
 }

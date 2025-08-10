@@ -1,59 +1,42 @@
-const db = require('../db/db')
+const knex = require("../db/db");
 
 async function findAll() {
-    return await db('casos').select('*')
+  return await knex("casos").select("*");
 }
 
 async function findById(id) {
-    const caso = await db('casos').where({ id }).first()
-    return caso || null
+  return await knex("casos").where({ id }).first();
 }
 
-async function create({ titulo, descricao, status, agente_id }) {
-    const [result] = await db('casos').insert({
-        titulo,
-        descricao,
-        status,
-        agente_id
-    }).returning('id')
-
-    const id = typeof result === 'object' ? result.id : result
-
-    return findById(id)
+async function create(caso) {
+  const [newId] = await knex("casos").insert(caso).returning("id");
+  return findById(newId);
 }
 
-async function update(id, { titulo, descricao, status, agente_id }) {
-    const rowsAffected = await db('casos')
-        .where({ id })
-        .update({ titulo, descricao, status, agente_id })
-
-    return rowsAffected ? findById(id) : null
+async function update(id, updateCaso) {
+  const count = await knex("casos").where({ id }).update(updateCaso);
+  if (count === 0) return undefined;
+  return findById(id);
 }
 
-async function patchById(id, updates) {
-    delete updates.id
-
-    const rowsAffected = await db('casos')
-        .where({ id })
-        .update(updates)
-
-    return rowsAffected ? findById(id) : null
+async function patchById(id, updateCaso) {
+  const count = await knex("casos").where({ id }).update(updateCaso);
+  if (count === 0) return undefined;
+  return findById(id);
 }
 
 async function deleteById(id) {
-    const caso = await findById(id)
-
-    if (!caso) return null
-
-    await db('casos').where({ id }).del()
-    return caso
+  const caso = await findById(id);
+  if (!caso) return undefined;
+  await knex("casos").where({ id }).del();
+  return true;
 }
 
 module.exports = {
-    findAll,
-    findById,
-    create,
-    update,
-    patchById,
-    deleteById
-}
+  findAll,
+  findById,
+  create,
+  update,
+  patchById,
+  deleteById,
+};
