@@ -1,12 +1,10 @@
-const { table } = require("../db");
-
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
   return knex.schema.createTable('agentes', function(table) {
-    table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'))
+    table.increments('id').primary() 
     table.string('nome').notNullable()
     table.date('dataDeIncorporacao').notNullable()
     table.string('cargo').notNullable()
