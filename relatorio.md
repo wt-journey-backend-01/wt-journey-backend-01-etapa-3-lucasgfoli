@@ -2,10 +2,10 @@
 
 # 🧪 Relatório de Avaliação – Journey Levty Etapa 1 - lucasgfoli
 
-**Data:** 10/08/2025 00:55
+**Data:** 11/08/2025 20:44
 
-**Nota Final:** `91.45/100`
-**Status:** ✅ Aprovado
+**Nota Final:** `11.45/100`
+**Status:** ❌ Reprovado
 
 ---
 ## ✅ Requisitos Obrigatórios
