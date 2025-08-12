@@ -52,7 +52,7 @@ async function getAllAgentes(req, res) {
             })
         }
 
-        res.status(200).json(agentes)
+        res.status(200).json(Array.isArray(agentes) ? agentes : [])
     } catch (error) {
         handlerError(res, error)
     }
@@ -76,16 +76,15 @@ async function createAgente(req, res) {
     try {
         const { nome, dataDeIncorporacao, cargo } = req.body
 
-        if (!validarData(dataDeIncorporacao))
-            return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' })
-
         if (!nome || !dataDeIncorporacao || !cargo)
-            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' })
-
-        const newAgente = { nome, dataDeIncorporacao, cargo }
-
-        const agenteCriado = await agentesRepository.create(newAgente)
-        res.status(201).json(agenteCriado)
+            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+        if (!validarData(dataDeIncorporacao))
+            return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' });
+        const newAgente = { nome, dataDeIncorporacao, cargo: cargo.toLowerCase() };
+        const agenteCriado = await agentesRepository.create(newAgente);
+        // Busca o agente pelo id para garantir retorno completo
+        const agenteRetornado = await agentesRepository.findById(agenteCriado.id || agenteCriado);
+        res.status(201).json(agenteRetornado);
     } catch (error) {
         handlerError(res, error)
     }
@@ -97,20 +96,15 @@ async function updateAgente(req, res) {
         const { nome, dataDeIncorporacao, cargo, id: idBody } = req.body
 
         if(idBody && idBody !== id)
-            return res.status(400).json({message: "O campo 'id' não pode ser alterado."})
-
-        if (!validarData(dataDeIncorporacao))
-            return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' })
-
+            return res.status(400).json({message: "O campo 'id' não pode ser alterado."});
         if (!nome || !dataDeIncorporacao || !cargo)
-            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' })
-
-        const agenteAtualizado = await agentesRepository.update(id, { nome, dataDeIncorporacao, cargo })
-
+            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+        if (!validarData(dataDeIncorporacao))
+            return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' });
+        const agenteAtualizado = await agentesRepository.update(id, { nome, dataDeIncorporacao, cargo: cargo.toLowerCase() });
         if (!agenteAtualizado)
-            return res.status(404).json({ message: 'Agente não encontrado.' })
-
-        res.status(200).json(agenteAtualizado)
+            return res.status(404).json({ message: 'Agente não encontrado.' });
+        res.status(200).json(agenteAtualizado);
     } catch (error) {
         handlerError(res, error)
     }
@@ -133,12 +127,12 @@ async function patchAgente(req, res) {
         if (camposAtualizaveis.length === 0)
             return res.status(400).json({ message: 'Deve conter pelo menos um campo válido para atualização.' })
 
-        const patchedAgente = await agentesRepository.patchById(id, updates)
-
+        // Se houver campo cargo, padronize para minúsculo
+        if (updates.cargo) updates.cargo = updates.cargo.toLowerCase();
+        const patchedAgente = await agentesRepository.patchById(id, updates);
         if (!patchedAgente)
-            return res.status(404).json({ message: 'Agente não encontrado.' })
-
-        res.status(200).json(patchedAgente)
+            return res.status(404).json({ message: 'Agente não encontrado.' });
+        res.status(200).json(patchedAgente);
     } catch (error) {
         handlerError(res, error)
     }
@@ -150,10 +144,9 @@ async function deleteAgente(req, res) {
         const agente = await agentesRepository.findById(id)
 
         if (!agente)
-            return res.status(404).json({ message: 'Agente não encontrado.' })
-
-        await agentesRepository.deleteById(id)
-        res.status(204).send()
+            return res.status(404).json({ message: 'Agente não encontrado.' });
+        await agentesRepository.deleteById(id);
+        res.status(204).send();
     } catch (error) {
         handlerError(res, error)
     }

@@ -56,7 +56,7 @@ async function getAllCasos(req, res) {
                 agente: await agentesRepository.findById(caso.agente_id)
             })))
 
-        res.status(200).json(casosComMesmoAgente)
+        res.status(200).json(Array.isArray(casosComMesmoAgente) ? casosComMesmoAgente : [])
     } catch (error) {
         handlerError(res, error)
     }
@@ -68,14 +68,9 @@ async function getSpecificCase(req, res) {
         const caso = await casosRepository.findById(id)
 
         if (!caso)
-            return res.status(404).json({ message: "Caso não encontrado." })
-
-        const agente = await agentesRepository.findById(caso.agente_id)
-
-        res.status(200).json({
-            ...caso,
-            agente
-        })
+            return res.status(404).json({ message: "Caso não encontrado." });
+        const agente = await agentesRepository.findById(caso.agente_id);
+        res.status(200).json({ ...caso, agente });
     } catch (error) {
         handlerError(res, error)
     }
@@ -84,27 +79,20 @@ async function getSpecificCase(req, res) {
 async function createCase(req, res) {
     try {
         const { titulo, descricao, status, agente_id } = req.body
-        const agenteExistente = await agentesRepository.findById(agente_id)
-
-        if (typeof titulo !== 'string')
-            return res.status(400).json({ message: "O título deve ser uma string." })
-
-        if (typeof descricao !== 'string')
-            return res.status(400).json({ message: "A descrição deve ser uma string." })
-
-        if (!agenteExistente)
-            return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
-
         if (!titulo || !descricao || !status || !agente_id)
-            return res.status(400).json({ message: "Todos os campos são obrigatórios." })
-
+            return res.status(400).json({ message: "Todos os campos são obrigatórios." });
+        if (typeof titulo !== 'string')
+            return res.status(400).json({ message: "O título deve ser uma string." });
+        if (typeof descricao !== 'string')
+            return res.status(400).json({ message: "A descrição deve ser uma string." });
         if (status !== "aberto" && status !== "solucionado")
-            return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
-
-        const newCase = { titulo, descricao, status, agente_id }
-        const createdCase = await casosRepository.create(newCase)
-
-        res.status(201).json(createdCase)
+            return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." });
+        const agenteExistente = await agentesRepository.findById(agente_id);
+        if (!agenteExistente)
+            return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." });
+        const newCase = { titulo, descricao, status, agente_id };
+        const createdCase = await casosRepository.create(newCase);
+        res.status(201).json(createdCase);
     } catch (error) {
         handlerError(res, error)
     }
@@ -114,32 +102,23 @@ async function updateCase(req, res) {
     try {
         const { id } = req.params
         const { id: idBody, titulo, descricao, status, agente_id } = req.body
-        const agenteExistente = await agentesRepository.findById(agente_id)
-
         if (idBody && idBody !== id)
-            return res.status(400).json({ message: "O campo 'id' não pode ser alterado." })
-
-        if (typeof titulo !== 'string')
-            return res.status(400).json({ message: "O título deve ser uma string." })
-
-        if (typeof descricao !== 'string')
-            return res.status(400).json({ message: "A descrição deve ser uma string." })
-
-        if (!agenteExistente)
-            return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
-
+            return res.status(400).json({ message: "O campo 'id' não pode ser alterado." });
         if (!titulo || !descricao || !status || !agente_id)
-            return res.status(400).json({ message: "Todos os campos são obrigatórios." })
-
+            return res.status(400).json({ message: "Todos os campos são obrigatórios." });
+        if (typeof titulo !== 'string')
+            return res.status(400).json({ message: "O título deve ser uma string." });
+        if (typeof descricao !== 'string')
+            return res.status(400).json({ message: "A descrição deve ser uma string." });
         if (status !== "aberto" && status !== "solucionado")
-            return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
-
-        const updatedCase = await casosRepository.update(id, { titulo, descricao, status, agente_id })
-
+            return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." });
+        const agenteExistente = await agentesRepository.findById(agente_id);
+        if (!agenteExistente)
+            return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." });
+        const updatedCase = await casosRepository.update(id, { titulo, descricao, status, agente_id });
         if (!updatedCase)
-            return res.status(404).json({ message: "Caso não encontrado." })
-
-        res.status(200).json(updatedCase)
+            return res.status(404).json({ message: "Caso não encontrado." });
+        res.status(200).json(updatedCase);
     } catch (error) {
         handlerError(res, error)
     }
@@ -176,12 +155,10 @@ async function patchCase(req, res) {
                 return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
         }
 
-        const updatedCase = await casosRepository.patchById(id, updates)
-
+        const updatedCase = await casosRepository.patchById(id, updates);
         if (!updatedCase)
-            return res.status(404).json({ message: "Caso não encontrado." })
-
-        res.status(200).json(updatedCase)
+            return res.status(404).json({ message: "Caso não encontrado." });
+        res.status(200).json(updatedCase);
     } catch (error) {
         handlerError(res, error)
     }
@@ -193,10 +170,9 @@ async function deleteCase(req, res) {
         const casoDeletado = await casosRepository.findById(id)
 
         if (!casoDeletado)
-            return res.status(404).json({ message: "Caso não encontrado." })
-
-        await casosRepository.deleteById(id)
-        res.status(204).send()
+            return res.status(404).json({ message: "Caso não encontrado." });
+        await casosRepository.deleteById(id);
+        res.status(204).send();
     } catch (error) {
         handlerError(res, error)
     }
