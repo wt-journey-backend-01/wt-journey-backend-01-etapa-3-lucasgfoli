@@ -59,17 +59,13 @@ async function getAllAgentes(req, res) {
 }
 
 async function getAgenteById(req, res) {
-    try {
         const { id } = req.params
         const agente = await agentesRepository.findById(id)
 
         if (!agente)
             return res.status(404).json({ message: 'Agente não encontrado.' })
-
+        else
         res.status(200).json(agente)
-    } catch (error) {
-        handlerError(res, error)
-    }
 }
 
 async function createAgente(req, res) {
