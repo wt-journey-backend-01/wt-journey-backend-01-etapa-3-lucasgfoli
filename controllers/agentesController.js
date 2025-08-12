@@ -2,151 +2,87 @@ const agentesRepository = require('../repositories/agentesRepository')
 const handlerError = require('../utils/errorHandler')
 
 async function getAllAgentes(req, res) {
-    try {
-        const { cargo, dataDeIncorporacao, orderBy, order } = req.query
-        let agentes = await agentesRepository.findAll()
-        const { dataInicio, dataFim } = req.query
+    const agentes = agentesRepository.findAll()
 
-        if (dataInicio || dataFim) {
-            agentes = agentes.filter(agente => {
-                const data = new Date(agente.dataDeIncorporacao)
-                const inicio = dataInicio ? new Date(dataInicio) : null
-                const fim = dataFim ? new Date(dataFim) : null
-
-                return (!inicio || data >= inicio) && (!fim || data <= fim)
-            })
-        }
-
-        if (cargo) {
-            const cargosValidos = ['delegado', 'Investigador', 'escrivao', 'Policial']
-            if (!cargosValidos.includes(cargo.toLowerCase()))
-                return res.status(400).json({ message: `Cargo inválido. Use um dos seguintes valores: ${cargosValidos.join(', ')}` })
-
-            agentes = agentes.filter(agente =>
-                agente.cargo && agente.cargo.toLowerCase() === cargo.toLowerCase()
-            )
-        }
-
-        if (dataDeIncorporacao) {
-            if (!validarData(dataDeIncorporacao))
-                return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' })
-
-            agentes = agentes.filter(agente => agente.dataDeIncorporacao === dataDeIncorporacao)
-        }
-
-        if (order && order !== 'asc' && order !== 'desc') {
-            return res.status(400).json({ message: "Parâmetro 'order' inválido. Use 'asc' ou 'desc'." })
-        }
-
-        if (orderBy) {
-            const camposValidos = ['nome', 'dataDeIncorporacao', 'cargo']
-            if (!camposValidos.includes(orderBy)) {
-                return res.status(400).json({ message: `Campo para ordenação inválido. Use: ${camposValidos.join(', ')}` })
-            }
-
-            agentes.sort((a, b) => {
-                const ordem = order === 'desc' ? -1 : 1
-                if (a[orderBy] < b[orderBy]) return -1 * ordem
-                if (a[orderBy] > b[orderBy]) return 1 * ordem
-                return 0
-            })
-        }
-
-        res.status(200).json(Array.isArray(agentes) ? agentes : [])
-    } catch (error) {
-        handlerError(res, error)
-    }
+    res.status(200).json(agentes)
 }
 
 async function getAgenteById(req, res) {
-        const { id } = req.params
-        const agente = await agentesRepository.findById(id)
+    const { id } = req.params
+    const agente = await agentesRepository.findById(id)
 
-        if (!agente)
-            return res.status(404).json({ message: 'Agente não encontrado.' })
-        else
+    if (!agente)
+        return res.status(404).json({ message: 'Agente não encontrado.' })
+    else
         res.status(200).json(agente)
 }
 
 async function createAgente(req, res) {
-    try {
-        const { nome, dataDeIncorporacao, cargo } = req.body
+    const { nome, dataDeIncorporacao, cargo } = req.body
 
-        if (!nome || !dataDeIncorporacao || !cargo)
-            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
-        if (!validarData(dataDeIncorporacao))
-            return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' });
-        const newAgente = { nome, dataDeIncorporacao, cargo: cargo.toLowerCase() };
-        const agenteCriado = await agentesRepository.create(newAgente);
-        // Busca o agente pelo id para garantir retorno completo
-        const agenteRetornado = await agentesRepository.findById(agenteCriado.id || agenteCriado);
-        res.status(201).json(agenteRetornado);
-    } catch (error) {
-        handlerError(res, error)
-    }
+    if (!nome || !dataDeIncorporacao || !cargo)
+        return res.status(400).json({ message: 'Todos os campos são obrigatórios.' })
+    else if (!validarData(dataDeIncorporacao))
+        return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' })
+
+    const newAgente = { nome, dataDeIncorporacao, cargo }
+    const agenteCreated = await agentesRepository.create(newAgente)
+
+    const agenteRetornado = await agentesRepository.findById(agenteCriado.id)
+
+    res.status(201).json(agenteRetornado)
 }
 
 async function updateAgente(req, res) {
-    try {
-        const { id } = req.params
-        const { nome, dataDeIncorporacao, cargo, id: idBody } = req.body
+    const { id } = req.params
+    const { nome, dataDeIncorporacao, cargo, id: idBody } = req.body
 
-        if(idBody && idBody !== id)
-            return res.status(400).json({message: "O campo 'id' não pode ser alterado."});
-        if (!nome || !dataDeIncorporacao || !cargo)
-            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
-        if (!validarData(dataDeIncorporacao))
-            return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' });
+    if (idBody && idBody !== id)
+        return res.status(400).json({ message: "O campo 'id' não pode ser alterado." });
+    else if (!nome || !dataDeIncorporacao || !cargo)
+        return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+    else if (!validarData(dataDeIncorporacao))
+        return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' });
+    else {
         const agenteAtualizado = await agentesRepository.update(id, { nome, dataDeIncorporacao, cargo: cargo.toLowerCase() });
         if (!agenteAtualizado)
             return res.status(404).json({ message: 'Agente não encontrado.' });
         res.status(200).json(agenteAtualizado);
-    } catch (error) {
-        handlerError(res, error)
     }
 }
 
 async function patchAgente(req, res) {
-    try {
         const { id } = req.params
         const updates = req.body
         const camposValidos = ['nome', 'dataDeIncorporacao', 'cargo']
 
-        if('id' in updates)
-            return res.status(400).json({message: "O campo 'id' não pode ser alterado."})
+        if ('id' in updates)
+            return res.status(400).json({ message: "O campo 'id' não pode ser alterado." })
 
         const camposAtualizaveis = Object.keys(updates).filter(campo => camposValidos.includes(campo))
 
         if (updates.dataDeIncorporacao && !validarData(updates.dataDeIncorporacao))
             return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' })
-
-        if (camposAtualizaveis.length === 0)
+        else if (camposAtualizaveis.length === 0)
             return res.status(400).json({ message: 'Deve conter pelo menos um campo válido para atualização.' })
-
-        // Se houver campo cargo, padronize para minúsculo
-        if (updates.cargo) updates.cargo = updates.cargo.toLowerCase();
+        else {
         const patchedAgente = await agentesRepository.patchById(id, updates);
-        if (!patchedAgente)
-            return res.status(404).json({ message: 'Agente não encontrado.' });
-        res.status(200).json(patchedAgente);
-    } catch (error) {
-        handlerError(res, error)
+        const agenteReturned = agentesRepository.findById(patchedAgente.id)
+
+        res.status(200).json(agenteReturned);
     }
 }
 
 async function deleteAgente(req, res) {
-    try {
         const { id } = req.params
         const agente = await agentesRepository.findById(id)
 
         if (!agente)
             return res.status(404).json({ message: 'Agente não encontrado.' });
+        else {
         await agentesRepository.deleteById(id);
         res.status(204).send();
-    } catch (error) {
-        handlerError(res, error)
-    }
-}
+}}
 
 function validarData(dateString) {
     const regex = /^\d{4}-\d{2}-\d{2}$/
