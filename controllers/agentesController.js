@@ -1,5 +1,15 @@
-const agentesRepository = require('../repositories/agentesRepository')
-const handlerError = require('../utils/errorHandler')
+const agentesRepository = require('../repositories/agentesRepository');
+const handlerError = require('../utils/errorHandler');
+
+function validarData(dateString) {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateString)) return false;
+    const date = new Date(dateString);
+    const today = new Date();
+    if (isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== dateString) return false;
+    if (date > today) return false;
+    return true;
+}
 
 async function getAllAgentes(req, res) {
     try {
@@ -122,7 +132,17 @@ async function deleteAgente(req, res) {
         res.status(204).send();
     } catch (error) {
         handlerError(res, error);
-    }}
+    }
+}
+
+module.exports = {
+    getAllAgentes,
+    getAgenteById,
+    createAgente,
+    updateAgente,
+    patchAgente,
+    deleteAgente
+};
 
 function validarData(dateString) {
     const regex = /^\d{4}-\d{2}-\d{2}$/
