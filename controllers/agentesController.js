@@ -135,15 +135,6 @@ async function deleteAgente(req, res) {
     }
 }
 
-module.exports = {
-    getAllAgentes,
-    getAgenteById,
-    createAgente,
-    updateAgente,
-    patchAgente,
-    deleteAgente
-};
-
 function validarData(dateString) {
     const regex = /^\d{4}-\d{2}-\d{2}$/
 
