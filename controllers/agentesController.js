@@ -135,22 +135,6 @@ async function deleteAgente(req, res) {
     }
 }
 
-function validarData(dateString) {
-    const regex = /^\d{4}-\d{2}-\d{2}$/
-
-    if (!regex.test(dateString)) return false
-
-    const date = new Date(dateString)
-    const today = new Date()
-
-    if (isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== dateString)
-        return false
-
-    if (date > today) return false
-
-    return true
-}
-
 module.exports = {
     getAllAgentes,
     getAgenteById,
