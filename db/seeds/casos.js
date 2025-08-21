@@ -1,12 +1,14 @@
 /**
  * @param { import("knex").Knex } knex
- * @returns { Promise<void> } 
+ * @returns { Promise<void> }
  */
 exports.seed = async function(knex) {
-  // Deletes ALL existing entries
+  // Apaga dados existentes para evitar duplicação
   await knex('casos').del()
+
+  // Insere casos (ligados aos agentes)
   await knex('casos').insert([
-    {titulo: 'Roubo ao banco', descricao: 'Roubo ao banco na data 2025-07-21', status: 'aberto', agente_id: 1},
-    {titulo: 'Homicídio no Shopping Cidade', descricao: 'Investigação em andamento', status: 'aberto', agente_id: 2}
-  ]);
-};
+    { titulo: 'Roubo no centro', descricao: 'Roubo a uma joalheria no centro da cidade.', status: 'aberto', agente_id: 1 },
+    { titulo: 'Fraude bancária', descricao: 'Esquema de fraude envolvendo cartões clonados.', status: 'solucionado', agente_id: 2 }
+  ])
+}
